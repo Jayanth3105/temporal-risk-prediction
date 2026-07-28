@@ -1,0 +1,827 @@
+Absolutely. Based on everything we've done over the past two days and every file we've inspected, here's the complete architecture and engineering document. This is the document I would hand to a new team member before they touched a single line of code.
+
+Temporal Risk Prediction for Autonomous Driving
+Complete Architecture Review & Engineering Roadmap
+Author: Jayanth K
+1. Project Goal
+
+The objective of this project is not object detection.
+
+It is future trajectory prediction for dynamic road users.
+
+Input:
+
+RGB Camera
++
+Past trajectory (History)
+
+Output:
+
+Predicted Future Trajectory
+
+Then
+
+Future Trajectory
+↓
+
+ADE/FDE
+
+↓
+
+Risk Assessment
+
+↓
+
+Visualization
+2. Complete Pipeline
+Argoverse 2 Dataset
+        │
+        ▼
+dataset_builder.py
+        │
+        ▼
+processed_train.json
+processed_val.json
+processed_test.json
+        │
+        ▼
+TrajectoryDataset
+(train.py)
+        │
+        ▼
+DataLoader
+        │
+        ▼
+TemporalPredictor
+        │
+        ├── ResNet18
+        │
+        └── LSTM / BiLSTM
+        │
+        ▼
+Future Prediction
+        │
+        ▼
+evaluate.py
+        │
+        ▼
+risk.py
+        │
+        ▼
+results.json
+        │
+        ▼
+results_analyzer.py
+3. What every file does
+config.py
+
+Purpose
+
+Stores every configurable parameter.
+
+Contains
+
+Dataset paths
+
+History length
+
+Prediction length
+
+Learning rate
+
+Epochs
+
+Risk thresholds
+
+Visualization colours
+
+Camera parameters
+
+Status
+
+FREEZE
+
+No changes required.
+
+dataset_builder.py
+
+Purpose
+
+Converts raw AV2 into trajectory samples.
+
+Pipeline
+
+AV2
+
+↓
+
+Read annotations
+
+↓
+
+Read camera timestamps
+
+↓
+
+Synchronize
+
+↓
+
+Group by Track UUID
+
+↓
+
+Sliding Window
+
+↓
+
+TrainingSample
+
+↓
+
+processed_train.json
+processed_val.json
+processed_test.json
+
+One TrainingSample
+
+History (10)
+
+Future (5)
+
+Image
+
+Timestamp
+
+Track UUID
+
+Category
+
+Most Important Discovery
+
+The builder DOES preserve
+
+log_id
+
+timestamp_ns
+
+track_uuid
+
+Therefore
+
+Scene reconstruction is still possible.
+
+Status
+
+FREEZE
+
+No changes.
+
+processed_train.json
+
+Contains
+
+One object
+
+History
+
+Future
+
+Image
+
+Metadata
+
+NOT
+
+One frame.
+
+One trajectory.
+
+Exactly as intended.
+
+TrajectoryDataset (train.py)
+
+Purpose
+
+Loads processed JSON.
+
+Returns
+
+Image Tensor
+
+History Tensor
+
+Future Tensor
+
+Category
+
+Problem
+
+Currently
+
+it does NOT return
+
+log_id
+
+timestamp_ns
+
+track_uuid
+
+image_path
+
+These exist internally.
+
+But are discarded.
+
+Modification
+
+Return metadata during inference.
+
+Training remains unchanged.
+
+train.py
+
+Purpose
+
+Training loop.
+
+Pipeline
+
+Batch
+
+↓
+
+Forward
+
+↓
+
+Loss
+
+↓
+
+Backward
+
+↓
+
+Optimizer
+
+↓
+
+Checkpoint
+
+Everything here is correct.
+
+Status
+
+FREEZE
+
+except adding metadata to Dataset.
+
+predict.py
+
+Purpose
+
+Neural Network.
+
+Contains
+
+ResNet18
+
++
+
+LSTM
+
+or
+
+BiLSTM
+
+Input
+
+History
+
++
+
+Image
+
+Output
+
+Future Prediction
+
+Important
+
+The network has NO knowledge of
+
+timestamp
+
+track_uuid
+
+scene
+
+Exactly correct.
+
+Status
+
+FREEZE
+evaluate.py
+
+Purpose
+
+Computes
+
+ADE
+
+FDE
+
+RMSE
+
+Per trajectory.
+
+Does NOT depend on scenes.
+
+Status
+
+FREEZE
+risk.py
+
+Purpose
+
+Computes
+
+Distance
+
+↓
+
+Speed
+
+↓
+
+TTC
+
+↓
+
+Risk Score
+
+↓
+
+LOW
+
+MEDIUM
+
+HIGH
+
+Current limitation
+
+Per-object only.
+
+Does not consider neighbouring vehicles.
+
+Acceptable for this project.
+
+Status
+
+FREEZE
+tracked_object.py
+
+Universal object container.
+
+Stores
+
+Track ID
+
+UUID
+
+Class
+
+History
+
+Prediction
+
+Ground Truth
+
+Velocity
+
+Risk
+
+ADE
+
+FDE
+
+Timestamp
+
+Excellent design.
+
+Already supports deployment.
+
+Status
+
+FREEZE
+FrameData
+
+Purpose
+
+Container representing one scene.
+
+Contains
+
+Frame
+
+↓
+
+Tracked Objects
+
+↓
+
+Predicted Objects
+
+Important
+
+Already supports
+
+List[TrackedObject]
+
+Meaning
+
+Architecture was already designed for
+
+MULTIPLE OBJECTS.
+
+Status
+
+FREEZE
+main.py
+
+THIS IS THE CULPRIT.
+
+Current
+
+processed_test
+
+↓
+
+DataLoader
+
+↓
+
+One Sample
+
+↓
+
+Prediction
+
+↓
+
+results.json
+
+Loop
+
+for sample in loader
+
+writes
+
+One frame
+
+↓
+
+One track
+
+This causes
+
+results.json
+
+↓
+
+57454 entries
+
+↓
+
+1 object each
+
+Problem
+
+Treats
+
+Trajectory Sample
+
+as
+
+Scene.
+
+results.json
+
+Current
+
+[
+Frame1
+Track1
+
+Frame2
+Track2
+
+Frame3
+Track3
+]
+
+Should become
+
+[
+Frame1
+
+Tracks
+
+Car
+
+Pedestrian
+
+Cyclist
+
+Truck
+
+...
+
+Frame2
+
+Tracks
+
+...
+]
+results_analyzer.py
+
+Current
+
+Reads
+
+results.json
+
+Renderer
+
+Already loops through
+
+frame["tracks"]
+
+Therefore
+
+No architectural redesign needed.
+
+Only improve visuals after fixing inference.
+
+4. Biggest Discovery
+
+processed_test.json contains
+
+log_id
+
+timestamp_ns
+
+track_uuid
+
+We proved
+
+One timestamp has
+
+79 trajectory samples
+
+Meaning
+
+Scene information still exists.
+
+It is NOT lost.
+
+5. Real Problem
+
+NOT
+
+BiLSTM
+
+NOT
+
+LSTM
+
+NOT
+
+Dataset Builder
+
+NOT
+
+Training
+
+Problem is
+
+main.py
+
+which ignores
+
+log_id
+
+timestamp_ns
+
+track_uuid
+
+and processes
+
+Trajectory
+
+↓
+
+Prediction
+
+↓
+
+JSON
+
+instead of
+
+Scene
+
+↓
+
+Objects
+
+↓
+
+Prediction
+
+↓
+
+JSON
+6. Correct Deployment Architecture
+processed_test.json
+
+↓
+
+Group by
+
+(log_id,timestamp_ns)
+
+↓
+
+Scene
+
+↓
+
+Object1
+
+↓
+
+Predict
+
+↓
+
+Object2
+
+↓
+
+Predict
+
+↓
+
+...
+
+↓
+
+Scene JSON
+
+↓
+
+Renderer
+7. Files To Modify
+
+Only
+
+train.py
+
+Return
+
+log_id
+
+timestamp_ns
+
+track_uuid
+
+image_path
+main.py
+
+Instead of
+
+for sample
+
+Group
+
+(log_id,timestamp)
+
+Predict every object.
+
+Write
+
+tracks=[
+...
+]
+results_analyzer.py
+
+Use multiple tracks.
+
+Nothing more.
+
+8. Files Frozen
+config.py
+
+dataset_builder.py
+
+predict.py
+
+evaluate.py
+
+risk.py
+
+tracked_object.py
+
+FrameData.py
+
+These should not be modified.
+
+9. Testing Strategy
+
+Before full LSTM training
+
+Run
+
+Epoch = 1
+
+Verify
+
+Training ✓
+
+Inference ✓
+
+results.json
+
+↓
+
+Multiple Tracks
+
+Renderer ✓
+
+Only after this
+
+Train
+
+50 Epochs
+10. Long-Term Deployment
+
+Offline
+
+processed_test.json
+
+↓
+
+Grouped Scene
+
+↓
+
+Predict
+
+↓
+
+Dashboard
+
+Real-world
+
+Camera
+
+↓
+
+YOLO
+
+↓
+
+ByteTrack
+
+↓
+
+History Buffer
+
+↓
+
+LSTM/BiLSTM
+
+↓
+
+Risk
+
+↓
+
+Dashboard
+
+No ML redesign required.
+
+Final Verdict
+
+The project's core machine learning architecture is sound. The model, dataset preparation, evaluation metrics, risk estimation, and object representation are all modular and aligned with trajectory prediction research. The gap is in the inference orchestration: the current main.py processes each trajectory sample independently, even though the processed dataset retains enough metadata (log_id, timestamp_ns, track_uuid) to reconstruct complete scenes.
+
+Because of that, I would freeze almost the entire codebase and make only targeted changes:
+
+Expose metadata from TrajectoryDataset.
+Group samples into scenes during inference.
+Write scene-based results.json.
+Reuse the existing renderer with the richer JSON.
+
+This is an engineering completion task, not a machine-learning redesign. Once that is in place, you can confidently run the LSTM experiment, validate the pipeline with a short smoke test, and then perform the full training run.

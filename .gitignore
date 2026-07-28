@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environment
+venv/
+
+# Dataset
+datasets/
+
+# Outputs
+outputs/
+
+# Logs
+logs/
+runs/
+
+# Models (don't upload now)
+models/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

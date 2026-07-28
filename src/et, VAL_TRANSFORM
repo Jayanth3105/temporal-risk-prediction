@@ -1,0 +1,73 @@
+Help on class TrajectoryDataset in module train:
+
+class TTrraajjeeccttoorryyDDaattaasseett(torch.utils.data.dataset.Dataset)
+ |  TrajectoryDataset(json_path: 'str | Path', transform: 'transforms.Compose') -> 'None'
+ |  
+ |  PyTorch Dataset for trajectory prediction.
+ |  
+ |  Loads samples from a processed_*.json file produced by
+ |  dataset_builder.py. Each entry contains:
+ |  
+ |      log_id: str
+ |      image_path: str
+ |      timestamp_ns: int
+ |      track_uuid: str
+ |      category: str
+ |      history: [[x, y], ...]  # relative coords
+ |      future: [[x, y], ...]   # relative coords
+ |  
+ |  The dataset returns:
+ |      image    : Tensor (C, H, W), normalized for ResNet18
+ |      history  : Tensor (H, 2)
+ |      future   : Tensor (F, 2)
+ |      category : str (for class-wise analysis later)
+ |  
+ |  Method resolution order:
+ |      TrajectoryDataset
+ |      torch.utils.data.dataset.Dataset
+ |      typing.Generic
+ |      builtins.object
+ |  
+ |  Methods defined here:
+ |  
+ |  ____ggeettiitteemm____(self, idx: 'int') -> 'Dict[str, object]'
+ |  
+ |  ____iinniitt____(self, json_path: 'str | Path', transform: 'transforms.Compose') -> 'None'
+ |      Initialize self.  See help(type(self)) for accurate signature.
+ |  
+ |  ____lleenn____(self) -> 'int'
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |  
+ |  ____ppaarraammeetteerrss____ = ()
+ |  
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from torch.utils.data.dataset.Dataset:
+ |  
+ |  ____aadddd____(self, other: 'Dataset[_T_co]') -> 'ConcatDataset[_T_co]'
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from torch.utils.data.dataset.Dataset:
+ |  
+ |  ____ddiicctt____
+ |      dictionary for instance variables (if defined)
+ |  
+ |  ____wweeaakkrreeff____
+ |      list of weak references to the object (if defined)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from torch.utils.data.dataset.Dataset:
+ |  
+ |  ____oorriigg__bbaasseess____ = (typing.Generic[+_T_co],)
+ |  
+ |  ----------------------------------------------------------------------
+ |  Class methods inherited from typing.Generic:
+ |  
+ |  ____ccllaassss__ggeettiitteemm____(params) from builtins.type
+ |  
+ |  ____iinniitt__ssuubbccllaassss____(*args, **kwargs) from builtins.type
+ |      This method is called when a class is subclassed.
+ |      
+ |      The default implementation does nothing. It may be
+ |      overridden to extend subclasses.
