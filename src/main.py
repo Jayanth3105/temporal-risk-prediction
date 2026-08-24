@@ -49,7 +49,7 @@ from train import TrajectoryDataset, VAL_TRANSFORM
 from evaluate import compute_ade, compute_fde, compute_rmse
 from risk import evaluate_risk
 from tracked_object import TrackedObject
-from results_analyzer import ResultsVisualizer
+#from results_analyzer_v3 import ResultsVisualizer
 
 
 # =========================================================
@@ -64,7 +64,7 @@ def initialize_model() -> TemporalPredictor:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = TemporalPredictor()
-    model_path = Path(config.MODEL_DIR) / "bilstm" / "best_bilstm.pt"
+    model_path = Path(config.MODEL_DIR) / "lstm" / "best_lstm.pt"
 
     if not model_path.exists():
         raise FileNotFoundError(
@@ -285,7 +285,7 @@ def save_results_json(results: Dict[str, Any]) -> Path:
     output_dir = Path(config.PREDICTION_DIR)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    out_path = output_dir / "results.json"
+    out_path = output_dir / "results_lstm.json"
     with out_path.open("w", encoding="utf-8") as f:
         json.dump(results["frames"], f, ensure_ascii=False, indent=2)
 

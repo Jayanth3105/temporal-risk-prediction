@@ -1,28 +1,33 @@
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-
-# Virtual environment
+*.pyo
+*.pyd
 venv/
+.venv/
+env/
+
+# IDE / tools
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # Dataset
 datasets/
 
-# Outputs
-outputs/
+# Generated prediction results
+outputs/predictions/
 
-# Logs
-logs/
-runs/
+# Generated videos
+outputs/videos/
 
-# Models (don't upload now)
-models/
+# Trained model weights
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
 
-# IDE
-.vscode/
-.idea/
-
-# OS
+# Temporary files
+*.log
+*.tmp
 .DS_Store
-Thumbs.db

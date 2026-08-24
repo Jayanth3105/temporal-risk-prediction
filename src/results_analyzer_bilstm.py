@@ -175,7 +175,7 @@ class ResultsVisualizer:
     # Main render
     # =========================================================
 
-    def render(self, output_name: str = "result_v5_direction_fixed.mp4") -> Path:
+    def render(self, output_name: str = "result_v5_bilstm_direction_fixed.mp4") -> Path:
         if not self.frames:
             raise RuntimeError("No results loaded.")
 
@@ -294,7 +294,7 @@ class ResultsVisualizer:
             cv2.LINE_AA,
         )
 
-        model = getattr(config, "MODEL_NAME", "LSTM")
+        model = "BiLSTM"
         dataset_name = getattr(
             config,
             "DATASET_NAME",
@@ -352,7 +352,7 @@ class ResultsVisualizer:
         stages = [
             "Camera",
             "History",
-            "LSTM / BiLSTM",
+            "BiLSTM",
             "Future Prediction",
             "ADE / FDE",
             "Risk",
@@ -1513,7 +1513,7 @@ def main() -> None:
 
     results_path = (
         Path(config.PREDICTION_DIR)
-        / "results_lstm.json"
+        / "results.json"
     )
 
     visualizer = ResultsVisualizer(
@@ -1523,7 +1523,7 @@ def main() -> None:
     visualizer.load_results()
 
     output = visualizer.render(
-        output_name="result_lstm.mp4"
+        output_name="result_bilstm.mp4"
     )
 
     print(f"Saved: {output}")
