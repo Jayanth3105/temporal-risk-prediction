@@ -243,11 +243,6 @@ Possible extensions:
 
 ---
 
-## 📄 License & Citation
-
-*(Add your license and citation info here if needed.)*
-
----
 
 ## 👤 Author
 
