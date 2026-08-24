@@ -38,17 +38,77 @@ The core idea: *single-frame perception tells what is happening now; temporal pr
 
 Both models predict the same future trajectory points and are compared using the same metrics and visualizations.
 
+### Model Performance
+
+![LSTM vs BiLSTM Performance](outputs/figures/01_lstm_vs_bilstm_performance.png)
+
 ---
 
 ## 📊 Evaluation
 
-- **ADE:** Average error over all predicted time steps (lower = better)  
-- **FDE:** Error at the final predicted time step (lower = better)  
-- Additional analyses:  
-  - Error vs prediction horizon  
-  - Class-wise ADE  
-  - ADE distribution  
-  - Risk distribution  
+The models are evaluated using trajectory prediction errors and additional analyses.
+
+### ADE and FDE
+
+- **ADE:** Average displacement error across the prediction horizon.  
+- **FDE:** Final displacement error at the final prediction timestep.  
+- **Lower values indicate better trajectory prediction accuracy.**
+
+### Prediction Horizon
+
+Prediction error is analyzed across different future timesteps.
+
+![Error vs Prediction Horizon](outputs/figures/02_error_vs_prediction_horizon.png)
+
+### Class-wise Performance
+
+Prediction accuracy is also analyzed across object classes.
+
+![Class-wise ADE](outputs/figures/03_classwise_ADE.png)
+
+### ADE Distribution
+
+The distribution of trajectory prediction errors is shown below.
+
+![ADE Distribution](outputs/figures/06_ADE_distribution.png)
+
+### Risk Distribution
+
+The generated risk levels are summarized below.
+
+![Risk Distribution](outputs/figures/04_risk_distribution.png)
+
+---
+
+## 🎯 Trajectory Visualization
+
+The system compares the observed trajectory, predicted future trajectory, and ground-truth future trajectory.
+
+![Example Trajectory Comparison](outputs/figures/05_example_trajectory_comparison.png)
+
+The visualization provides a qualitative complement to ADE/FDE by showing how the predicted trajectory behaves relative to the actual future motion.
+
+### LSTM vs BiLSTM Summary
+
+![Model Comparison Table](outputs/figures/07_comparison_table.png)
+
+---
+
+## 🎥 Demo Visualization
+
+The final visualization combines the camera scene, tracked objects, trajectory prediction, ground truth, prediction errors, and risk information.
+
+### LSTM
+
+![LSTM Demo 1](outputs/figures/lstm_demo_01.jpg)
+
+![LSTM Demo 2](outputs/figures/lstm_demo_02.png)
+
+### BiLSTM
+
+![BiLSTM Demo 1](outputs/figures/bilstm_demo_01.jpg)
+
+![BiLSTM Demo 2](outputs/figures/bilstm_demo_02.jpg)
 
 ---
 
@@ -78,6 +138,18 @@ temporal-risk-prediction/
 │
 ├── outputs/
 │   └── figures/
+│       ├── 01_lstm_vs_bilstm_performance.png
+│       ├── 02_error_vs_prediction_horizon.png
+│       ├── 03_classwise_ADE.png
+│       ├── 04_risk_distribution.png
+│       ├── 05_example_trajectory_comparison.png
+│       ├── 06_ADE_distribution.png
+│       ├── 07_comparison_table.png
+│       ├── lstm_demo_01.jpg
+│       ├── lstm_demo_02.png
+│       ├── bilstm_demo_01.jpg
+│       ├── bilstm_demo_02.jpg
+│       └── groupC.pdf
 │
 ├── notebooks/
 ├── configs/
@@ -136,12 +208,12 @@ The project produces:
 
 ## 🧪 Results
 
-- Quantitative:  
+- **Quantitative:**  
   - LSTM vs BiLSTM ADE/FDE  
   - Error vs prediction horizon  
   - Class-wise ADE  
   - ADE and risk distributions  
-- Qualitative:  
+- **Qualitative:**  
   - Observed vs predicted vs ground-truth trajectories  
   - Camera scenes with tracked objects and risk levels  
 
@@ -152,7 +224,7 @@ Numerical metrics are interpreted together with trajectory visualizations and ri
 ## ⚠️ Limitations
 
 - Experimental research implementation, not a production ADAS system  
-- Future motion is inherently uncertain; errors grow with horizon  
+- Future motion is inherently uncertain; errors grow with prediction horizon  
 - Camera-based perception depends on scene and visibility conditions  
 - Risk assessment is a simplified, research-oriented formulation  
 
